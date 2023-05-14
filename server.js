@@ -14,7 +14,10 @@ const client = new pg.Client(process.env.DBURL)
 app.use(cors());
 app.get('/getMovies', handleGetMovies)
 app.post('/getMovies', handleAddMovies)
+app.get('/getMovies/:id', getMovieById)
 
+app.put('/getMovies/:id', updateMovie);
+app.delete('/getMovies/:id', deleteMovie);
 
 // Home Page Endpoint
 app.get('/', (req, res) => {
@@ -136,6 +139,44 @@ function handleGetMovies(req, res) {
   
     client.query(sql, handleValueFromUser).then(data => {
       res.json(data.rows)
+    }).catch(err => errorHandler(err, req, res))
+  }
+
+  function getMovieById(req, res) {
+    function Movie(title, comments, id) {
+        this.title = title;
+        this.comments = comments;
+        this.id = id;
+
+      }
+    // console.log(req.params)
+    const id = req.params.id;
+    const sql = `select * from movies where id = ${id}`;
+    client.query(sql).then(data => {
+      const recObj = new Movie(data.rows[0].title, data.rows[0].overview, data.rows[0].id)
+      res.status(200).json(recObj)
+    }
+    )
+  }
+  
+  function updateMovie(req, res) {
+    const id = req.params.id;
+    const newData = req.body;
+    const sql = `update movies set title = $1, overview = $2, where id = ${id} returning *`;
+    const updatedValue = [newData.title, newData.overview,id];
+    client.query(sql, updatedValue).then(data =>
+      res.status(202).json(data.rows)
+    )
+  }
+  
+  function deleteMovie(req, res) {
+    const id = req.params.id;
+    const sql = `delete from movies where id = ${id}`;
+    client.query(sql).then(() => {
+      return res.status(204).json({
+        code: 204,
+        message: `Row deleted successfully with id: ${id}`
+      })
     }).catch(err => errorHandler(err, req, res))
   }
 
