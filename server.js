@@ -6,14 +6,15 @@ const app = express();
 const data = require('./Movie-Data/data.json');
 const axios = require('axios');
 const pg = require('pg')
-const client = new pg.Client(process.env.DBURL)
+app.use(express.json())
 
 
 require('dotenv').config();
-
+const client = new pg.Client(process.env.DBURL)
 app.use(cors());
 app.get('/getMovies', handleGetMovies)
-app.post('/addMovies', handleAddMovies)
+app.post('/getMovies', handleAddMovies)
+
 
 // Home Page Endpoint
 app.get('/', (req, res) => {
@@ -129,18 +130,15 @@ function handleGetMovies(req, res) {
 
   function handleAddMovies(req, res) {
     const userInput = req.body;
-    const sql = `insert into movies(title,overview) values($1, $2) returning *`;
+    const sql = `insert into movies (title,overview) values($1, $2) returning *`;
   
     const handleValueFromUser = [userInput.title, userInput.overview];
   
     client.query(sql, handleValueFromUser).then(data => {
-      res.status(201).json(data.rows)
+      res.json(data.rows)
     }).catch(err => errorHandler(err, req, res))
   }
 
-  
-  
-  
 function errorHandler(error, req, res) {
     res.status(500).json({
       code: 500,
