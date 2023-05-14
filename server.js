@@ -5,13 +5,15 @@ const cors = require('cors');
 const app = express();
 const data = require('./Movie-Data/data.json');
 const axios = require('axios');
+const pg = require('pg')
+const client = new pg.Client(process.env.DBURL)
 
 
 require('dotenv').config();
 
 app.use(cors());
-
-
+app.get('/getMovies', handleGetMovies)
+app.post('/getMovies', handleAddMovies)
 
 // Home Page Endpoint
 app.get('/', (req, res) => {
@@ -110,27 +112,57 @@ app.get('/trending', async (req, res) => {
       });
     }
   });
+
+
+
+function handleGetMovies(req, res) {
+    const sql = `select * from movies`;
+    client.query(sql).then(data => {
+      res.json({
+        count: data.rowCount,
+        data: data.rows
+      })
+    }).catch(err => {
+      errorHandler(err, req, res);
+    })
+  }
+
+  function handleAddMovies(req, res) {
+    const userInput = req.body;
+    const sql = `insert into movies(title,overview) values($1, $2) returning *`;
+  
+    const handleValueFromUser = [userInput.title, userInput.overview];
+  
+    client.query(sql, handleValueFromUser).then(data => {
+      res.status(201).json(data.rows)
+    }).catch(err => errorHandler(err, req, res))
+  }
+
   
   
   
-// Error handling for server error (status 500)
-app.use((err, req, res, next) => {
-  res.status(500).json({
-    status: 500,
-    responseText: "Sorry, something went wrong"
-  });
-});
+function errorHandler(error, req, res) {
+    res.status(500).json({
+      code: 500,
+      message: error.message || error
+    })
+  }
 
 // Error handling for "page not found error" (status 404)
 app.use((req, res) => {
   res.status(404).json({
     status: 404,
     responseText: "Page not found"
-  });
+    });
 });
 
-// Start the server
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Server started on port ${port}`);
-});
+app.use(errorHandler)
+client.connect().then(()=>{
+    console.log('connected to the database')
+    // Start the server
+    const port = process.env.PORT;
+    app.listen(port, () => {console.log(`Server started on port ${port}`);});
+})
+
+
+
