@@ -43,3 +43,34 @@ Create a get request to retrieve all data from the database.
       "movies": [/* Array of movies from the database */]
     }
     ```
+13. Update Movie Comments
+- Method: PUT
+- Route: /UPDATE/:id
+- Description: Update the comments for a specific movie in the database.
+- Request Parameters:
+  - `id` (string): The ID of the movie to update.
+- Request Body:
+  - `comments` (string): The updated comments for the movie.
+- Response:
+  - Status Code: 200 (OK)
+  - Response Body: "Movie comments updated successfully"
+
+14. Delete Movie
+- Method: DELETE
+- Route: /DELETE/:id
+- Description: Remove a specific movie from the database.
+- Request Parameters:
+  - `id` (string): The ID of the movie to delete.
+- Response:
+  - Status Code: 200 (OK)
+  - Response Body: "Movie deleted successfully"
+
+15. Get Movie
+- Method: GET
+- Route: /getMovie/:id
+- Description: Get the details of a specific movie from the database.
+- Request Parameters:
+  - `id` (string): The ID of the movie to retrieve.
+- Response:
+  - Status Code: 200 (OK)
+  - Response Body: The JSON object containing the details of the movie.    
