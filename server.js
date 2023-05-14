@@ -13,7 +13,7 @@ require('dotenv').config();
 
 app.use(cors());
 app.get('/getMovies', handleGetMovies)
-app.post('/getMovies', handleAddMovies)
+app.post('/addMovies', handleAddMovies)
 
 // Home Page Endpoint
 app.get('/', (req, res) => {
