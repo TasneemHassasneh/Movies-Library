@@ -133,9 +133,9 @@ function handleGetMovies(req, res) {
 
   function handleAddMovies(req, res) {
     const userInput = req.body;
-    const sql = `insert into movies (title,overview) values($1, $2) returning *`;
+    const sql = `insert into movies (title,comments) values($1, $2) returning *`;
   
-    const handleValueFromUser = [userInput.title, userInput.overview];
+    const handleValueFromUser = [userInput.title, userInput.comments];
   
     client.query(sql, handleValueFromUser).then(data => {
       res.json(data.rows)
@@ -144,29 +144,33 @@ function handleGetMovies(req, res) {
 
   function getMovieById(req, res) {
     function Movie(title, comments, id) {
+        this.id = id;  
         this.title = title;
         this.comments = comments;
-        this.id = id;
-
       }
     // console.log(req.params)
     const id = req.params.id;
     const sql = `select * from movies where id = ${id}`;
     client.query(sql).then(data => {
-      const recObj = new Movie(data.rows[0].title, data.rows[0].overview, data.rows[0].id)
+      const recObj = new Movie(data.rows[0].title, data.rows[0].comments, data.rows[0].id)
       res.status(200).json(recObj)
     }
     )
   }
   
   function updateMovie(req, res) {
-    const id = req.params.id;
-    const newData = req.body;
-    const sql = `update movies set title = $1, overview = $2, where id = ${id} returning *`;
-    const updatedValue = [newData.title, newData.overview,id];
-    client.query(sql, updatedValue).then(data =>
-      res.status(202).json(data.rows)
-    )
+    const movieId = req.params.id;
+    const { comments } = req.body;
+  
+    // Update the comments for the specified movie in the database
+    client.query('UPDATE movies SET comments = $1 WHERE id = $2', [comments, movieId], (error, results) => {
+      if (error) {
+        console.error('Error updating movie comments:', error);
+        res.status(500).json({ error: 'Failed to update movie comments in the database' });
+      } else {
+        res.status(200).json({ message: 'Movie comments updated successfully' });
+      }
+    });
   }
   
   function deleteMovie(req, res) {
@@ -179,6 +183,8 @@ function handleGetMovies(req, res) {
       })
     }).catch(err => errorHandler(err, req, res))
   }
+
+
 
 function errorHandler(error, req, res) {
     res.status(500).json({
