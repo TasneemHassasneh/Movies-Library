@@ -119,17 +119,19 @@ app.get('/trending', async (req, res) => {
 
 
 
-function handleGetMovies(req, res) {
-    const sql = `select * from movies`;
-    client.query(sql).then(data => {
-      res.json({
-        count: data.rowCount,
-        data: data.rows
+  function handleGetMovies(req, res) {
+    const sql = `SELECT * FROM movies`;
+  
+    client.query(sql)
+      .then(data => {
+        const movies = data.rows;
+        res.json(movies);
       })
-    }).catch(err => {
-      errorHandler(err, req, res);
-    })
+      .catch(err => {
+        errorHandler(err, req, res);
+      });
   }
+  
 
   function handleAddMovies(req, res) {
     const userInput = req.body;
