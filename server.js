@@ -120,7 +120,7 @@ app.get('/trending', async (req, res) => {
 
 
   function handleGetMovies(req, res) {
-    const sql = `SELECT * FROM movies`;
+    const sql = `SELECT * FROM movie`;
   
     client.query(sql)
       .then(data => {
@@ -135,9 +135,9 @@ app.get('/trending', async (req, res) => {
 
   function handleAddMovies(req, res) {
     const userInput = req.body;
-    const sql = `insert into movies (title,comments) values($1, $2) returning *`;
+    const sql = `insert into movie (title,release_date,poster_path,overview,comments) values($1, $2,$3,$4,$5) returning *`;
   
-    const handleValueFromUser = [userInput.title, userInput.comments];
+    const handleValueFromUser = [userInput.title,userInput.release_date,userInput.poster_path,userInput.overview ,userInput.comments];
   
     client.query(sql, handleValueFromUser).then(data => {
       res.json(data.rows)
@@ -152,7 +152,7 @@ app.get('/trending', async (req, res) => {
       }
     // console.log(req.params)
     const id = req.params.id;
-    const sql = `select * from movies where id = ${id}`;
+    const sql = `select * from movie where id = ${id}`;
     client.query(sql).then(data => {
       const recObj = new Movie(data.rows[0].title, data.rows[0].comments, data.rows[0].id)
       res.status(200).json(recObj)
@@ -177,7 +177,7 @@ app.get('/trending', async (req, res) => {
   
   function deleteMovie(req, res) {
     const id = req.params.id;
-    const sql = `delete from movies where id = ${id}`;
+    const sql = `delete from movie where id = ${id}`;
     client.query(sql).then(() => {
       return res.status(204).json({
         code: 204,
