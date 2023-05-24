@@ -165,7 +165,7 @@ app.get('/trending', async (req, res) => {
     const { comments } = req.body;
   
     // Update the comments for the specified movie in the database
-    client.query('UPDATE movies SET comments = $1 WHERE id = $2', [comments, movieId], (error, results) => {
+    client.query('UPDATE movie SET comments = $1 WHERE id = $2', [comments, movieId], (error, results) => {
       if (error) {
         console.error('Error updating movie comments:', error);
         res.status(500).json({ error: 'Failed to update movie comments in the database' });
